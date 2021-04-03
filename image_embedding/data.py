@@ -1,13 +1,13 @@
 import cv2
 import os
 import torch
-from pandas as pd
+import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
 from albumentations import (
     HorizontalFlip, VerticalFlip, IAAPerspective, ShiftScaleRotate, CLAHE, RandomRotate90, Rotate,
     Transpose, ShiftScaleRotate, Blur, OpticalDistortion, GridDistortion, HueSaturationValue,
-    IAAAdditiveGaussianNoise, GaussNoise, MotionBlur, MedianBlur, IAAPiecewiseAffine, RandomResizedCrop,
+    IAAAdditiveGaussianNoise, GaussNoise, MotionBlur, MedianBlur, IAAPiecewiseAffine, RandomBrightness,
     IAASharpen, IAAEmboss, RandomBrightnessContrast, Flip, OneOf, Compose, Normalize, Cutout, CoarseDropout, ShiftScaleRotate, CenterCrop, Resize
 )
 
@@ -21,11 +21,12 @@ class ShopeeDataset(Dataset):
         self.augmentations = transforms
 
     def __len__(self):
-        return self.csv.shape[0]
+        return self.df.shape[0]
 
     def __getitem__(self, index):
-        image_path = os.path.join(self.config.paths['TRAIN_PATH'], self.df.loc[index]['image_id'])
-        image = cv2.imread(row.filepath)
+        row = self.df.loc[index]
+        image_path = os.path.join(self.config.paths['train_path'], row['image'])
+        image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         if self.augmentations:

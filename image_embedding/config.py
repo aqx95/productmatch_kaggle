@@ -5,6 +5,9 @@ class GlobalConfig:
     seed = 2020
     num_folds = 5
 
+    paths = {"csv_path": "../../train.csv",
+             "train_path": "../../train_images"}
+
     #model
     model = 'effnet'
     model_name = 'efficientnet_b3'
@@ -29,6 +32,7 @@ class GlobalConfig:
     ls_eps = 0.0
     easy_margin = False
 
+    train_step_scheduler = True
     scheduler_params = {
             "lr_start": 1e-5,
             "lr_max": 1e-5 * 16,

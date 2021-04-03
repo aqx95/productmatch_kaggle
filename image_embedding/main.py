@@ -12,6 +12,7 @@ from sklearn.model_selection import StratifiedKFold
 from model import ShopeeNet
 from data import prepare_loader
 from config import GlobalConfig
+from commons import AverageMeter
 from scheduler import ShopeeScheduler
 
 def seed_everything(seed):
@@ -23,12 +24,12 @@ def seed_everything(seed):
     torch.backends.cudnn.deterministic = True
 
 
-def create_fold(df):
+def create_fold(df, config):
     df_folds = df.copy()
     skf = StratifiedKFold(n_splits=config.num_folds, shuffle=True, random_state=config.seed).split(
                         X=df_folds['image'], y=df_folds['label_group'])
     for fold, (train_idx, val_idx) in enumerate(skf):
-        df_folds.loc[val_idx, 'fold'] = int(fold+1)
+        df_folds.loc[val_idx, 'fold'] = fold
 
     return df_folds
 
@@ -54,8 +55,9 @@ def train_one_epoch(train_loader, model, criterion, optimizer, device, scheduler
         description = f"Train Steps {step}/{len(train_loader)} train loss: {loss_score.avg:.3f}"
         pbar.set_description(description)
 
-    if config.train_step_scheduler:
-            scheduler.step(epoch+step/len(train_loader))
+        if config.train_step_scheduler:
+                scheduler.step(epoch+step/len(train_loader))
+        break
 
     return loss_score
 
@@ -68,10 +70,10 @@ def validate_one_epoch(valid_loader, model, criterion, device, scheduler, epoch,
     with torch.no_grad():
         for step, (images, targets) in pbar:
             batch_size = images.size()[0]
-            image = image.to(device)
+            images = images.to(device)
             targets = targets.to(device)
 
-            output = model(image,targets)
+            output = model(images,targets)
             loss = criterion(output,targets)
             loss_score.update(loss.detach().item(), batch_size)
             description = f"Valid Steps {step}/{len(valid_loader)} valid loss: {loss_score.avg:.3f}"
@@ -88,23 +90,24 @@ if __name__ == '__main__':
     seed_everything(config.seed)
     train_csv = pd.read_csv(config.paths['csv_path'])
 
-    df_folds = create_folds(train_csv, config)
+    df_folds = create_fold(train_csv, config)
     encoder = LabelEncoder()
-    data['label_group'] = encoder.fit_transform(data['label_group'])
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = ShopeeNet(**config.model_params)
-    model.to(device)
-    criterion = nn.CrossEntropyLoss()
-    criterion.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.scheduler_params['lr_start'])
-    scheduler = ShopeeScheduler(optimizer, **config.scheduler_params)
+    df_folds['label_group'] = encoder.fit_transform(df_folds['label_group'])
 
 
-    for fold in config.num_folds:
+    for fold in range(config.num_folds):
         train_df = df_folds[df_folds['fold'] != fold].reset_index(drop=True)
         valid_df = df_folds[df_folds['fold'] == fold].reset_index(drop=True)
         train_loader, valid_loader = prepare_loader(train_df, valid_df, config)
+
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        model = ShopeeNet(**config.model_params)
+        model.to(device)
+        criterion = nn.CrossEntropyLoss()
+        criterion.to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=config.scheduler_params['lr_start'])
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer=optimizer,
+                  T_0=config.num_epochs, T_mult=1, eta_min=1e-6, last_epoch=-1)
 
         best_loss = np.inf
         for epoch in range(config.num_epochs):
