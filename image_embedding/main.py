@@ -76,6 +76,7 @@ def validate_one_epoch(valid_loader, model, criterion, device, scheduler, epoch,
             loss = criterion(output,targets)
             loss_score.update(loss.detach().item(), batch_size)
             description = f"Valid Steps {step}/{len(valid_loader)} valid loss: {loss_score.avg:.3f}"
+            pbar.set_description(description)
 
     return loss_score.avg
 
@@ -115,4 +116,4 @@ if __name__ == '__main__':
 
              if valid_loss < best_loss:
                  torch.save(model.state_dict(),f'model_{config.model_name}_IMG_SIZE_{config.img_size}_{config.model_params["loss_module"]}.bin')
-                 print('best model found for epoch {}'.format(epoch))
+                 print(f'Loss improvement {best_loss} -> {valid_loss}')
