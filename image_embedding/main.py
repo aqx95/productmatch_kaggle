@@ -55,9 +55,8 @@ def train_one_epoch(train_loader, model, criterion, optimizer, device, scheduler
         description = f"Train Steps {step}/{len(train_loader)} train loss: {loss_score.avg:.3f}"
         pbar.set_description(description)
 
-        if config.train_step_scheduler:
-                scheduler.step(epoch+step/len(train_loader))
-        break
+    if config.train_step_scheduler:
+            scheduler.step()
 
     return loss_score
 
@@ -106,8 +105,8 @@ if __name__ == '__main__':
         criterion = nn.CrossEntropyLoss()
         criterion.to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=config.scheduler_params['lr_start'])
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer=optimizer,
-                  T_0=config.num_epochs, T_mult=1, eta_min=1e-6, last_epoch=-1)
+        scheduler = ShopeeScheduler(optimizer,**config.scheduler_params)#torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer=optimizer,
+                  #T_0=config.num_epochs, T_mult=1, eta_min=1e-6, last_epoch=-1)
 
         best_loss = np.inf
         for epoch in range(config.num_epochs):
@@ -115,5 +114,5 @@ if __name__ == '__main__':
              valid_loss = validate_one_epoch(valid_loader, model, criterion, device, scheduler, epoch, config)
 
              if valid_loss < best_loss:
-                 torch.save(model.state_dict(),f'model_{config.model_name}_IMG_SIZE_{config.img_size}_{config.loss_module}.bin')
+                 torch.save(model.state_dict(),f'model_{config.model_name}_IMG_SIZE_{config.img_size}_{config.model_params["loss_module"]}.bin')
                  print('best model found for epoch {}'.format(epoch))
