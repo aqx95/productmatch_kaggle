@@ -52,7 +52,7 @@ def train_one_epoch(train_loader, model, criterion, optimizer, device, scheduler
         optimizer.zero_grad()
 
         loss_score.update(loss.detach().item(), batch_size)
-        description = f"Train Steps {step}/{len(train_loader)} train loss: {loss_score.avg:.3f}"
+        description = f"Epoch {epoch} Train Steps {step}/{len(train_loader)} train loss: {loss_score.avg:.3f}"
         pbar.set_description(description)
 
     if config.train_step_scheduler:
@@ -75,7 +75,7 @@ def validate_one_epoch(valid_loader, model, criterion, device, scheduler, epoch,
             output = model(images,targets)
             loss = criterion(output,targets)
             loss_score.update(loss.detach().item(), batch_size)
-            description = f"Valid Steps {step}/{len(valid_loader)} valid loss: {loss_score.avg:.3f}"
+            description = f"Epoch {epoch} Valid Steps {step}/{len(valid_loader)} valid loss: {loss_score.avg:.3f}"
             pbar.set_description(description)
 
     return loss_score.avg
@@ -115,5 +115,7 @@ if __name__ == '__main__':
              valid_loss = validate_one_epoch(valid_loader, model, criterion, device, scheduler, epoch, config)
 
              if valid_loss < best_loss:
-                 torch.save(model.state_dict(),f'model_{config.model_name}_IMG_SIZE_{config.img_size}_{config.model_params["loss_module"]}.bin')
+                 torch.save(model.state_dict(),f'model_{config.model_name}_IMG_SIZE_{config.img_size}\
+                            _{config.model_params["loss_module"]}_fold{fold}.bin')
                  print(f'Loss improvement {best_loss} -> {valid_loss}')
+                 best_loss = valid_loss
