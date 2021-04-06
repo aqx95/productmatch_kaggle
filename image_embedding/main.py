@@ -105,7 +105,7 @@ if __name__ == '__main__':
         model.to(device)
         criterion = nn.CrossEntropyLoss()
         criterion.to(device)
-        optimizer = torch.optim.Adam(model.parameters(), lr=config.scheduler_params['lr_start'])
+        optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
         scheduler = ShopeeScheduler(optimizer,**config.scheduler_params)#torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer=optimizer,
                   #T_0=config.num_epochs, T_mult=1, eta_min=1e-6, last_epoch=-1)
 

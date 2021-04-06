@@ -44,12 +44,8 @@ def get_train_transforms(config):
             Resize(config.img_size, config.img_size, always_apply=True),
             HorizontalFlip(p=0.5),
             VerticalFlip(p=0.5),
-            Rotate(p=0.5),
-            RandomBrightness(limit=(0.09, 0.6), p=0.5),
-            #albumentations.Cutout(num_holes=8, max_h_size=8, max_w_size=8, fill_value=0, always_apply=False, p=0.5),
-            #albumentations.ShiftScaleRotate(
-              #  shift_limit=0.25, scale_limit=0.1, rotate_limit=0
-            #),
+            RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.5),
+            HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, p=0.5),
             Normalize(),
             ToTensorV2(p=1.0),
         ]

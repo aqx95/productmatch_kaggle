@@ -68,6 +68,7 @@ class ShopeeNet(nn.Module):
             logits = self.final(feature, label)
         else:
             logits = self.final(feature)
+        result = nn.Softmax(dim=1)(logits)
         return logits
 
     def extract_feat(self, x):

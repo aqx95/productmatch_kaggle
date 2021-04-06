@@ -4,6 +4,7 @@ class GlobalConfig:
     num_epochs = 10
     seed = 2020
     num_folds = 5
+    lr = 0.001
 
     paths = {"csv_path": "../../train.csv",
              "train_path": "../../train_images"}
@@ -34,8 +35,8 @@ class GlobalConfig:
 
     train_step_scheduler = True
     scheduler_params = {
-            "lr_start": 1e-5,
-            "lr_max": 1e-5 * 16,
+            "lr_start": 1e-6,
+            "lr_max": 5e-6 * 16,
             "lr_min": 1e-6,
             "lr_ramp_ep": 5,
             "lr_sus_ep": 0,
