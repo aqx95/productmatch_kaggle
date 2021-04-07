@@ -1,4 +1,7 @@
+import re
+import numpy as np
 import tensorflow as tf
+from config import GlobalConfig as config
 
 # Data augmentation function
 def data_augment(posting_id, image, label_group, matches):
@@ -14,7 +17,7 @@ def data_augment(posting_id, image, label_group, matches):
 # Function to decode our images
 def decode_image(image_data):
     image = tf.image.decode_jpeg(image_data, channels = 3)
-    image = tf.image.resize(image, IMAGE_SIZE)
+    image = tf.image.resize(image, config.IMAGE_SIZE)
     image = tf.cast(image, tf.float32) / 255.0
     return image
 
@@ -47,30 +50,30 @@ def load_dataset(filenames, ordered = False):
     if not ordered:
         ignore_order.experimental_deterministic = False
 
-    dataset = tf.data.TFRecordDataset(filenames, num_parallel_reads = AUTO)
+    dataset = tf.data.TFRecordDataset(filenames, num_parallel_reads = config.AUTO)
     dataset = dataset.with_options(ignore_order)
-    dataset = dataset.map(read_labeled_tfrecord, num_parallel_calls = AUTO)
+    dataset = dataset.map(read_labeled_tfrecord, num_parallel_calls = config.AUTO)
     return dataset
 
 
 # This function is to get our training tensors
 def get_training_dataset(filenames, ordered = False):
     dataset = load_dataset(filenames, ordered = ordered)
-    dataset = dataset.map(data_augment, num_parallel_calls = AUTO)
-    dataset = dataset.map(arcface_format, num_parallel_calls = AUTO)
+    dataset = dataset.map(data_augment, num_parallel_calls = config.AUTO)
+    dataset = dataset.map(arcface_format, num_parallel_calls = config.AUTO)
     dataset = dataset.repeat()
     dataset = dataset.shuffle(2048)
-    dataset = dataset.batch(BATCH_SIZE)
-    dataset = dataset.prefetch(AUTO)
+    dataset = dataset.batch(config.BATCH_SIZE)
+    dataset = dataset.prefetch(config.AUTO)
     return dataset
 
 
 # This function is to get our validation tensors
 def get_validation_dataset(filenames, ordered = True):
     dataset = load_dataset(filenames, ordered = ordered)
-    dataset = dataset.map(arcface_format, num_parallel_calls = AUTO)
-    dataset = dataset.batch(BATCH_SIZE)
-    dataset = dataset.prefetch(AUTO)
+    dataset = dataset.map(arcface_format, num_parallel_calls = config.AUTO)
+    dataset = dataset.batch(config.BATCH_SIZE)
+    dataset = dataset.prefetch(config.AUTO)
     return dataset
 
 

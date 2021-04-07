@@ -1,7 +1,7 @@
-import tandom
+import random
 import numpy as np
 import os
-import tensoflow as tf
+import tensorflow as tf
 
 
 # Function to seed everything
@@ -24,9 +24,9 @@ def f1_score(y_true, y_pred):
 
 
 # Function for a custom learning rate scheduler with warmup and decay
-def get_lr_callback():
+def get_lr_callback(config):
     lr_start   = 0.000001
-    lr_max     = 0.000005 * BATCH_SIZE
+    lr_max     = 0.000005 * config.BATCH_SIZE
     lr_min     = 0.000001
     lr_ramp_ep = 5
     lr_sus_ep  = 0

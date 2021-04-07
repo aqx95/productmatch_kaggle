@@ -18,16 +18,16 @@ from data import *
 from common import *
 from loss import ArcMarginProduct
 
-def get_model():
+def get_model(config):
     with strategy.scope():
         margin = ArcMarginProduct(
-            n_classes = N_CLASSES,
+            n_classes = config.N_CLASSES,
             s = 30,
             m = 0.5,
             name='head/arc_margin',
             dtype='float32')
 
-        inp = tf.keras.layers.Input(shape = (*IMAGE_SIZE, 3), name = 'inp1')
+        inp = tf.keras.layers.Input(shape = (*config.IMAGE_SIZE, 3), name = 'inp1')
         label = tf.keras.layers.Input(shape = (), name = 'inp2')
         x = efn.EfficientNetB3(weights = 'imagenet', include_top = False)(inp)
         x = tf.keras.layers.GlobalAveragePooling2D()(x)
@@ -35,7 +35,7 @@ def get_model():
 
         output = tf.keras.layers.Softmax(dtype='float32')(x)
         model = tf.keras.models.Model(inputs = [inp, label], outputs = [output])
-        opt = tf.keras.optimizers.Adam(learning_rate = LR)
+        opt = tf.keras.optimizers.Adam(learning_rate = config.LR)
 
         model.compile(
             optimizer = opt,
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     seed_everything(config.SEED)
     config.BATCH_SIZE = 8 * strategy.num_replicas_in_sync
 
-    NUM_TRAINING_IMAGES = count_data_items(TRAINING_FILENAMES)
+    NUM_TRAINING_IMAGES = count_data_items(config.TRAINING_FILENAMES)
     print(f'Dataset: {NUM_TRAINING_IMAGES} training images')
 
     print('\n')
@@ -80,8 +80,8 @@ if __name__ == '__main__':
 
     STEPS_PER_EPOCH = count_data_items(train) // config.BATCH_SIZE
     K.clear_session()
-    model = get_model()
-    
+    model = get_model(config)
+
     # Model checkpoint
     checkpoint = tf.keras.callbacks.ModelCheckpoint(f'EfficientNetB3_{config.IMAGE_SIZE[0]}_{config.SEED}.h5',
                                                     monitor = 'val_loss',
@@ -93,6 +93,6 @@ if __name__ == '__main__':
     history = model.fit(train_dataset,
                         steps_per_epoch = STEPS_PER_EPOCH,
                         epochs = config.EPOCHS,
-                        callbacks = [checkpoint, get_lr_callback()],
+                        callbacks = [checkpoint, get_lr_callback(config)],
                         validation_data = val_dataset,
                         verbose = config.VERBOSE)
