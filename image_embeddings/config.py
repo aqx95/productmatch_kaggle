@@ -5,7 +5,10 @@ class GlobalConfig:
     AUTO = tf.data.experimental.AUTOTUNE
     # Data access
     #GCS_PATH = KaggleDatasets().get_gcs_path('shopee-tf-records-512-stratified')
-    GCS_PATH = 'gs://kds-4455b1924919edf886d7524c5507375700d9bb4fee9d03ebb699fea0'
+    GCS_PATH = {'fold4': 'gs://kds-838b39d0b57295158cb378a4843d6eaf8f15cf439ab04b764095b419', #record-1
+                'fold3': 'gs://kds-2563599881b082e80f807556b0ec28115392e8490d6e53ccd7744f15',
+                'fold2': 'gs://kds-8fa83558d02d079e2cfb1505d9c0c1b073c9cdcfa284b08eb96c297c',
+                }
 
     # Configuration
     EPOCHS = 20
@@ -18,9 +21,7 @@ class GlobalConfig:
     # Verbosity
     VERBOSE = 1
     # Number of classes
-    N_CLASSES = 11014
+    OOF_CLASSES = [8811, 8812, 8811, 8811, 8811]
+    N_CLASSES = None
     # Number of folds
     FOLDS = 5
-
-    # Training filenames directory
-    TRAINING_FILENAMES = tf.io.gfile.glob(GCS_PATH + '/*.tfrec')
