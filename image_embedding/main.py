@@ -7,12 +7,12 @@ import torch.nn as nn
 from tqdm import tqdm
 
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, GroupKFold
 
 from model import ShopeeNet
 from data import prepare_loader
 from config import GlobalConfig
-from commons import AverageMeter
+from commons import LossMeter, AccMeter
 from scheduler import ShopeeScheduler
 
 def seed_everything(seed):
@@ -26,10 +26,11 @@ def seed_everything(seed):
 
 def create_fold(df, config):
     df_folds = df.copy()
-    skf = StratifiedKFold(n_splits=config.num_folds, shuffle=True, random_state=config.seed).split(
-                        X=df_folds['image'], y=df_folds['label_group'])
-    for fold, (train_idx, val_idx) in enumerate(skf):
-        df_folds.loc[val_idx, 'fold'] = fold
+    groups = df['label_group']
+    gkf = GroupKFold(n_splits=config.num_folds)
+    df_folds['fold'] = -1
+    for fold, (train_idx, valid_idx) in enumerate(gkf.split(df_folds, groups=groups)):
+        df_folds.loc[valid_idx, 'fold'] = fold
 
     return df_folds
 
@@ -37,7 +38,8 @@ def create_fold(df, config):
 
 def train_one_epoch(train_loader, model, criterion, optimizer, device, scheduler, epoch, config):
     model.train()
-    loss_score = AverageMeter()
+    loss_score = LossMeter()
+    acc_score = AccMeter()
     pbar = tqdm(enumerate(train_loader), total=len(train_loader))
 
     for step, (images, targets) in pbar:
@@ -52,13 +54,16 @@ def train_one_epoch(train_loader, model, criterion, optimizer, device, scheduler
         optimizer.zero_grad()
 
         loss_score.update(loss.detach().item(), batch_size)
-        description = f"Epoch {epoch} Train Steps {step}/{len(train_loader)} train loss: {loss_score.avg:.3f}"
+        acc = sum(torch.argmax(output, dim=1) == targets)
+        acc_score.update(acc, batch_size)
+        description = f"Epoch {epoch} Train Steps {step}/{len(train_loader)} \
+        train loss: {loss_score.avg:.3f} train acc: {acc_score.avg:.3f}"
         pbar.set_description(description)
 
     if config.train_step_scheduler:
             scheduler.step()
 
-    return loss_score
+    return loss_score.avg
 
 
 def validate_one_epoch(valid_loader, model, criterion, device, scheduler, epoch, config):
@@ -89,18 +94,19 @@ if __name__ == '__main__':
 
     seed_everything(config.seed)
     train_csv = pd.read_csv(config.paths['csv_path'])
-
     df_folds = create_fold(train_csv, config)
-    encoder = LabelEncoder()
-    df_folds['label_group'] = encoder.fit_transform(df_folds['label_group'])
 
 
     for fold in range(config.num_folds):
         train_df = df_folds[df_folds['fold'] != fold].reset_index(drop=True)
         valid_df = df_folds[df_folds['fold'] == fold].reset_index(drop=True)
+        encoder = LabelEncoder()
+        train_df['label_group'] = encoder.fit_transform(train_df['label_group'])
         train_loader, valid_loader = prepare_loader(train_df, valid_df, config)
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        config.model_params['n_classes'] = config.num_classes[fold]
+        print('Training with num_classes: {}'.format(config.model_params['n_classes']))
         model = ShopeeNet(**config.model_params)
         model.to(device)
         criterion = nn.CrossEntropyLoss()
@@ -112,10 +118,10 @@ if __name__ == '__main__':
         best_loss = np.inf
         for epoch in range(config.num_epochs):
              train_loss = train_one_epoch(train_loader, model, criterion, optimizer, device, scheduler, epoch, config)
-             valid_loss = validate_one_epoch(valid_loader, model, criterion, device, scheduler, epoch, config)
+             #valid_loss = validate_one_epoch(valid_loader, model, criterion, device, scheduler, epoch, config)
 
-             if valid_loss < best_loss:
+             if train_loss < best_loss:
                  torch.save(model.state_dict(),f'model_{config.model_name}_IMG_SIZE_{config.img_size}\
                             _{config.model_params["loss_module"]}_fold{fold}.bin')
-                 print(f'Loss improvement {best_loss} -> {valid_loss}')
-                 best_loss = valid_loss
+                 print(f'Loss improvement {best_loss} -> {train_loss}')
+                 best_loss = train_loss

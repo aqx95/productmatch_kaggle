@@ -4,17 +4,19 @@ class GlobalConfig:
     num_epochs = 10
     seed = 2020
     num_folds = 5
-    lr = 0.001
+    lr = 1e-5
+
+    num_classes = [8811, 8812, 8811, 8811, 8811]
 
     paths = {"csv_path": "../../train.csv",
              "train_path": "../../train_images"}
 
     #model
     model = 'effnet'
-    model_name = 'efficientnet_b3'
+    model_name = 'efficientnet_b1'
     model_params = {
         'n_classes':11014,
-        'model_name':'efficientnet_b3',
+        'model_name':'efficientnet_b1',
         'use_fc':False,
         'fc_dim':512,
         'dropout':0.0,
@@ -35,7 +37,7 @@ class GlobalConfig:
 
     train_step_scheduler = True
     scheduler_params = {
-            "lr_start": 1e-6,
+            "lr_start": 1e-5,
             "lr_max": 5e-6 * 16,
             "lr_min": 1e-6,
             "lr_ramp_ep": 5,
