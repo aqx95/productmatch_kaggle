@@ -48,6 +48,7 @@ def get_model(config):
 
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser(description='Shopee')
     parser.add_argument('--fold-num', type=int, required=True,
             help='validation fold number')
@@ -101,7 +102,7 @@ if __name__ == '__main__':
     # Model checkpoint
     checkpoint = tf.keras.callbacks.ModelCheckpoint(f'EfficientNetB1_{config.IMAGE_SIZE[0]}_fold{args.fold_num}.h5',
                                                     monitor = 'loss',
-                                                    verbose =config.VERBOSE,
+                                                    verbose = config.VERBOSE,
                                                     save_best_only = True,
                                                     save_weights_only = True,
                                                     mode = 'min')
