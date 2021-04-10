@@ -1,2 +1,4 @@
 efficientnet==1.1.1
 tensorflow_addons==0.12.1
+fsspec==0.9.0
+gcsfs==0.8.0
