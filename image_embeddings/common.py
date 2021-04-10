@@ -4,14 +4,6 @@ import os
 import tensorflow as tf
 
 
-# Function to seed everything
-def seed_everything(seed):
-    random.seed(seed)
-    np.random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    tf.random.set_seed(seed)
-
-
 # Function to get our f1 score
 def f1_score(y_true, y_pred):
     y_true = y_true.apply(lambda x: set(x.split()))

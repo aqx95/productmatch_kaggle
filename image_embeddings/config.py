@@ -27,3 +27,7 @@ class GlobalConfig:
     N_CLASSES = None
     # Number of folds
     FOLDS = 5
+
+    #Arcface
+    scale = 30
+    margin = 0.7
