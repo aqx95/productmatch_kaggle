@@ -11,10 +11,10 @@ class GlobalConfig:
                 'fold1': 'gs://kds-8c67250ea207fb44f392dc626d6839efa567abe5cae4207e073ed294',
                 'fold0': 'gs://kds-46eb44d14b0147e901228a60fda9f79d21946fabf5343ab28c4189d8'
                 }
+    SAVE_PATH = 'history'
 
     # Configuration
     EPOCHS = 20
-    #BATCH_SIZE = 8 * strategy.num_replicas_in_sync
     IMAGE_SIZE = [512, 512]
     # Seed
     SEED = 42
