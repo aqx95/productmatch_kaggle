@@ -15,6 +15,7 @@ import tensorflow as tf
 from tensorflow.keras import backend as K
 import tensorflow_addons as tfa
 import efficientnet.tfkeras as efn
+from tf.keras.callbacks import ModelCheckpoint
 
 from config import GlobalConfig
 from data import *
@@ -79,8 +80,8 @@ def seed_everything(seed):
 
 
 def plot_history(history, fold, config):
-  if not os.path.exists(config.SAVE_PATH):
-    os.makedirs(config.SAVE_PATH)
+  if not os.path.exists(config.LOG_PATH):
+    os.makedirs(config.LOG_PATH)
 
   loss = history.history['loss']
   acc = history.history['sparse_categorical_accuracy']
@@ -96,7 +97,7 @@ def plot_history(history, fold, config):
   plt.ylabel('Accuracy')
   plt.title('Training Accuracy')
 
-  plt.savefig(os.path.join(config.SAVE_PATH, f'fold_{fold}.png'))
+  plt.savefig(os.path.join(config.LOG_PATH, f'fold_{fold}.png'))
 
 
 
@@ -119,6 +120,10 @@ if __name__ == '__main__':
     config.BATCH_SIZE = 8 * strategy.num_replicas_in_sync
     print(config.__dict__)
 
+    # Create output dir
+    if not os.path.exists(config.SAVE_PATH):
+        os.makedirs(config.SAVE_PATH)
+
 
     ##Train Folds
     for fold in range(config.FOLDS):
@@ -133,6 +138,7 @@ if __name__ == '__main__':
         print(f'Dataset: {NUM_TRAINING_IMAGES} training images \n')
 
         valid = TRAINING_FILENAMES[fold]
+        #config.VALID_PATH = valid
         train = [file for file in TRAINING_FILENAMES if file != valid]
         print(f'Valid Set: {valid}')
         print(f'Train Set: {train} \n')
@@ -140,6 +146,7 @@ if __name__ == '__main__':
 
         #assert n_class
         csv = tf.io.gfile.glob(GCS_PATH + '/*.csv')[0]
+        #config.CSV_PATH = csv
         csv = pd.read_csv(csv)
         true_n_class = csv[csv['fold'] != fold]['label_group'].nunique()
         assert true_n_class == config.N_CLASSES, "Mismatch training class"
@@ -155,12 +162,13 @@ if __name__ == '__main__':
         model = get_model(config)
 
         # Model checkpoint
-        checkpoint = tf.keras.callbacks.ModelCheckpoint(f'{config.model}_{config.IMAGE_SIZE[0]}_fold{fold}.h5',
-                                                        monitor = 'loss',
-                                                        verbose = config.VERBOSE,
-                                                        save_best_only = True,
-                                                        save_weights_only = True,
-                                                        mode = 'min')
+        checkpoint = ModelCheckpoint(filepath = os.path.join(config.SAVE_PATH, \
+                                    f'{config.model}_{config.IMAGE_SIZE[0]}_fold{fold}.h5'),
+                                    monitor = 'loss',
+                                    verbose = config.VERBOSE,
+                                    save_best_only = True,
+                                    save_weights_only = True,
+                                    mode = 'min')
 
         history = model.fit(train_dataset,
                             steps_per_epoch = STEPS_PER_EPOCH,
