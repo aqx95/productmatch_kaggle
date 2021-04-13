@@ -32,3 +32,6 @@ class GlobalConfig:
     #Arcface
     scale = 30
     margin = 0.7
+
+    #model
+    preprocess_ = tf.keras.applications.resnet50.preprocess_input

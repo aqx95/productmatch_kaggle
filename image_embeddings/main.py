@@ -15,7 +15,7 @@ import tensorflow as tf
 from tensorflow.keras import backend as K
 import tensorflow_addons as tfa
 import efficientnet.tfkeras as efn
-from tf.keras.callbacks import ModelCheckpoint
+from classification_models.keras import Classifiers
 
 from config import GlobalConfig
 from data import *
@@ -36,6 +36,9 @@ def get_model(config):
         label = tf.keras.layers.Input(shape = (), name = 'inp2')
         if config.model == 'effnetb1':
             backbone = efn.EfficientNetB1(weights = 'imagenet', include_top = False)(inp)
+        if config.model == 'resnet50':
+            Resnet50, preprocess_input = Classifiers.get('resnet50')
+            backbone = Resnet50((512,512,3), weights='imagenet', include_top=False)(inp)
 
         x = tf.keras.layers.GlobalAveragePooling2D()(backbone)
         x = margin([x, label])
@@ -162,7 +165,7 @@ if __name__ == '__main__':
         model = get_model(config)
 
         # Model checkpoint
-        checkpoint = ModelCheckpoint(filepath = os.path.join(config.SAVE_PATH, \
+        checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath = os.path.join(config.SAVE_PATH, \
                                     f'{config.model}_{config.IMAGE_SIZE[0]}_fold{fold}.h5'),
                                     monitor = 'loss',
                                     verbose = config.VERBOSE,
