@@ -32,3 +32,8 @@ class GlobalConfig:
     #Arcface
     scale = 30
     margin = 0.7
+
+    #gem
+    gem_pool = True
+    p_ = 3.0
+    train_p = False
