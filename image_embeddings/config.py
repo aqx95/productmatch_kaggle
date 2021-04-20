@@ -5,11 +5,11 @@ class GlobalConfig:
     AUTO = tf.data.experimental.AUTOTUNE
     # Data access
     #GCS_PATH = KaggleDatasets().get_gcs_path('shopee-tf-records-512-stratified')
-    GCS_PATH = {'fold4': 'gs://kds-838b39d0b57295158cb378a4843d6eaf8f15cf439ab04b764095b419', #record-1
-                'fold3': 'gs://kds-2563599881b082e80f807556b0ec28115392e8490d6e53ccd7744f15',
-                'fold2': 'gs://kds-8fa83558d02d079e2cfb1505d9c0c1b073c9cdcfa284b08eb96c297c',
-                'fold1': 'gs://kds-8c67250ea207fb44f392dc626d6839efa567abe5cae4207e073ed294',
-                'fold0': 'gs://kds-46eb44d14b0147e901228a60fda9f79d21946fabf5343ab28c4189d8'
+    GCS_PATH = {'fold4': 'gs://kds-7209d3fbb77ddfff30e833d015cac7e2314371c5b7e879012dfaf14e', #record-1
+                'fold3': 'gs://kds-d49a15b017cf2f17384722b2cd1b26208bb8753643b4e41391a3c743',
+                'fold2': 'gs://kds-35f2577fc867feb30fef097c871194ad564ec81a9b59d8899f50d457',
+                'fold1': 'gs://kds-b7d74b30808c58b508415d01cedb4af2ca89d114599f20487c7e6d81',
+                'fold0': 'gs://kds-844eef7c7a46975154939ecb988d6f10a0615b24fccb6004c37382cc'
                 }
     SAVE_PATH = 'checkpoint'
     LOG_PATH = 'history'
@@ -34,6 +34,6 @@ class GlobalConfig:
     margin = 0.7
 
     #gem
-    gem_pool = True
+    gem_pool = False
     p_ = 3.0
     train_p = False
