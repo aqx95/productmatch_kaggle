@@ -55,9 +55,11 @@ def get_model(config):
         if config.model == 'effnetb1':
             backbone = efn.EfficientNetB1(weights = 'imagenet', include_top = False)(inp)
         if config.model == 'resnet50':
-            Resnet50, preprocess_input = Classifiers.get('resnet50')
-            backbone = Resnet50((512,512,3), weights='imagenet', include_top=False)(inp)
-
+            backbone = tf.keras.applications.ResNet50(include_top=False, weights='imagenet',
+                                                      input_shape=(512,512,3))(inp)
+        if config.model == 'xception':
+            backbone = tf.keras.applications.Xception(include_top=False, weights='imagenet',
+                                                      input_shape=(512,512,3))(inp)
         if config.gem_pool:
             x = GeMPoolingLayer(config.p_, train_p=config.train_p)(backbone)
         else:
