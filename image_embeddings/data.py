@@ -14,11 +14,11 @@ def data_augment(posting_id, image, label_group, matches):
     return posting_id, image, label_group, matches
 
 
-# Function to decode our images
+# Function to decode our  (add preprocessing_input here for TF Pretrained CNN)
 def decode_image(image_data):
     image = tf.image.decode_jpeg(image_data, channels = 3)
     image = tf.image.resize(image, config.IMAGE_SIZE)
-    image = tf.cast(image, tf.float32) / 255.0
+    image = tf.cast(image, tf.float32) / 255.0 #for effnet
     return image
 
 
