@@ -5,11 +5,11 @@ class GlobalConfig:
     AUTO = tf.data.experimental.AUTOTUNE
     # Data access
     ## 512
-    GCS_PATH = {'fold4': 'gs://kds-7209d3fbb77ddfff30e833d015cac7e2314371c5b7e879012dfaf14e', #record-1
-                'fold3': 'gs://kds-d49a15b017cf2f17384722b2cd1b26208bb8753643b4e41391a3c743',
-                'fold2': 'gs://kds-35f2577fc867feb30fef097c871194ad564ec81a9b59d8899f50d457',
-                'fold1': 'gs://kds-b7d74b30808c58b508415d01cedb4af2ca89d114599f20487c7e6d81',
-                'fold0': 'gs://kds-844eef7c7a46975154939ecb988d6f10a0615b24fccb6004c37382cc'
+    GCS_PATH = {'fold4': 'gs://kds-9ba2f2cb51c9e0518f7b325c49d244898c091332094101eeb05d5dc6', #record-1
+                'fold3': 'gs://kds-01c5abe8d9c96391d70580634bb0744d6d9bda70b650d3ed83342146',
+                'fold2': 'gs://kds-e0634726706afef1b28d34064cca8b0fb57a64ec2762334798cd6a6c',
+                'fold1': 'gs://kds-b286d2c01c3227c4cba912757f12bf8019835b4785fa47aa5ff6126c',
+                'fold0': 'gs://kds-a4851a353f29361cb5c5326c9c16e4a1ed05ac260fe4231237f82b37'
                 }
 
     ## 680
