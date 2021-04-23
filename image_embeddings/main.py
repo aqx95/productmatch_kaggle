@@ -64,6 +64,9 @@ def get_model(config):
             x = GeMPoolingLayer(config.p_, train_p=config.train_p)(backbone)
         else:
             x = tf.keras.layers.GlobalAveragePooling2D()(backbone)
+
+        x = tf.keras.layers.Dense(512)(x)
+        x = tf.keras.layers.BatchNormalization()(x)
         x = margin([x, label])
         output = tf.keras.layers.Softmax(dtype='float32')(x)
 
